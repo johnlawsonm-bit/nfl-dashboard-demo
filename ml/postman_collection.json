@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "NFL Season Projection API (Deployed on Modal)",
+    "_postman_id": "b3f2b6b0-2f2e-4b6a-9a1a-nfl-projection-api",
+    "description": "Tests the LIVE Modal deployment of the NFL Season Projection API, not localhost.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "MODAL_URL",
+      "value": "https://johnlawsonm-bit--nfl-season-projection-fastapi-app.modal.run"
+    },
+    {
+      "key": "VALID_TEAM_ID",
+      "value": "86e4b8f2-1224-4ab6-8bba-869ad7bec39c"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{MODAL_URL}}/health",
+          "host": ["{{MODAL_URL}}"],
+          "path": ["health"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Artifact reports loaded', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.artifact_loaded).to.eql(true);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pipeline Info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{MODAL_URL}}/pipeline-info",
+          "host": ["{{MODAL_URL}}"],
+          "path": ["pipeline-info"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response contains pipeline steps', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json).to.have.property('steps');",
+              "    pm.expect(json.steps).to.be.an('array').that.is.not.empty;",
+              "});",
+              "pm.test('Response contains built_at', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json).to.have.property('built_at');",
+              "});",
+              "pm.test('Response contains sklearn_version', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json).to.have.property('sklearn_version');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Valid Project",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"team_id\": \"{{VALID_TEAM_ID}}\",\n  \"season\": 2026\n}"
+        },
+        "url": {
+          "raw": "{{MODAL_URL}}/project",
+          "host": ["{{MODAL_URL}}"],
+          "path": ["project"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response contains expected projection fields', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json).to.have.property('current_record');",
+              "    pm.expect(json).to.have.property('previous_season_win_total');",
+              "    pm.expect(json).to.have.property('remaining_schedule');",
+              "    pm.expect(json).to.have.property('projection');",
+              "    pm.expect(json.projection).to.have.property('projected_final_record');",
+              "    pm.expect(json.projection).to.have.property('projected_remaining_wins');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid Project (out-of-bounds season)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"team_id\": \"{{VALID_TEAM_ID}}\",\n  \"season\": 1800\n}"
+        },
+        "url": {
+          "raw": "{{MODAL_URL}}/project",
+          "host": ["{{MODAL_URL}}"],
+          "path": ["project"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 422', function () {",
+              "    pm.response.to.have.status(422);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
