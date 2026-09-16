@@ -8,6 +8,7 @@ import {
   Calendar,
   ClipboardList,
   Trophy,
+  TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Team } from "@/lib/types";
@@ -24,6 +25,7 @@ import { CoachesTab } from "@/components/tabs/coaches-tab";
 import { ScheduleTab } from "@/components/tabs/schedule-tab";
 import { StatsTab } from "@/components/tabs/stats-tab";
 import { ResultsTab } from "@/components/tabs/results-tab";
+import { ProjectionsTab } from "@/components/tabs/projections-tab";
 
 const SEASONS = [2026, 2025];
 
@@ -63,6 +65,13 @@ const TABS = [
     icons: [Trophy, GoalpostIcon],
     needsTeam: true,
     needsSeason: true,
+  },
+  {
+    value: "projections",
+    label: "Season Projections",
+    icons: [TrendingUp],
+    needsTeam: true,
+    needsSeason: false,
   },
 ] as const;
 
@@ -150,6 +159,9 @@ export default function Home() {
                   teamsById={teamsById}
                 />
               )}
+            </TabsContent>
+            <TabsContent value="projections">
+              {selectedTeamId && <ProjectionsTab key={selectedTeamId} teamId={selectedTeamId} />}
             </TabsContent>
           </div>
         </Tabs>
